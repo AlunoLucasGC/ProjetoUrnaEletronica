@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urna Eletrônica</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <main class="pagina">
+
+        <!-- ======== LISTA DE CANDIDATOS (LADO ESQUERDO) ======== -->
+        <aside class="lista">
+            <h2>Candidatos</h2>
+            <!-- Preenchida pelo JavaScript com os candidatos do banco -->
+            <ul id="listaCandidatos"></ul>
+        </aside>
+
+        <!-- ===================== URNA ===================== -->
+        <div class="urna">
+
+            <!-- Tela (lado esquerdo) -->
+            <div class="tela">
+                <div class="tela-conteudo" id="tela">
+
+                    <!-- Tela de votação -->
+                    <div class="tela-voto" id="telaVoto">
+                        <div class="voto-esquerda">
+                            <p class="seu-voto">SEU VOTO PARA</p>
+                            <p class="cargo">Melhor do Mundo</p>
+
+                            <div class="linha-numero">
+                                <span class="rotulo">Número:</span>
+                                <div class="digitos">
+                                    <span class="digito pisca" id="digito1"></span>
+                                    <span class="digito" id="digito2"></span>
+                                </div>
+                            </div>
+
+                            <div class="info-candidato" id="infoCandidato">
+                                <p><span class="rotulo">Nome:</span> <span id="nome"></span></p>
+                                <p><span class="rotulo">Time:</span> <span id="time"></span></p>
+                            </div>
+
+                            <p class="aviso-grande pisca" id="aviso"></p>
+                        </div>
+
+                        <div class="voto-direita" id="fotoBox">
+                            <img id="foto" src="" alt="Foto do candidato">
+                            <span>Melhor do Mundo</span>
+                        </div>
+                    </div>
+
+                    <!-- Instruções (rodapé da tela) -->
+                    <div class="instrucoes" id="instrucoes">
+                        <p>Aperte a tecla:</p>
+                        <p><strong>VERDE</strong> para <strong>CONFIRMAR</strong> este voto</p>
+                        <p><strong>LARANJA</strong> para <strong>REINICIAR</strong> este voto</p>
+                    </div>
+
+                    <!-- Tela de FIM -->
+                    <div class="tela-fim" id="telaFim">FIM</div>
+                </div>
+            </div>
+
+            <!-- Teclado (lado direito) -->
+            <div class="teclado">
+                <div class="teclado-topo">
+                    <div class="brasao">⚖</div>
+                    <span>JUSTIÇA<br>ELEITORAL</span>
+                </div>
+
+                <div class="teclas-numeros">
+                    <button class="tecla" data-numero="1">1</button>
+                    <button class="tecla" data-numero="2">2</button>
+                    <button class="tecla" data-numero="3">3</button>
+                    <button class="tecla" data-numero="4">4</button>
+                    <button class="tecla" data-numero="5">5</button>
+                    <button class="tecla" data-numero="6">6</button>
+                    <button class="tecla" data-numero="7">7</button>
+                    <button class="tecla" data-numero="8">8</button>
+                    <button class="tecla" data-numero="9">9</button>
+                    <button class="tecla tecla-zero" data-numero="0">0</button>
+                </div>
+
+                <div class="teclas-acao">
+                    <button class="tecla-acao branco"   id="btnBranco">BRANCO</button>
+                    <button class="tecla-acao corrige"  id="btnCorrige">CORRIGE</button>
+                    <button class="tecla-acao confirma" id="btnConfirma">CONFIRMA</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ BOTÕES AO LADO DA URNA ============ -->
+        <aside class="painel">
+            <h2>Painel da Votação</h2>
+            <p class="alerta-banco" id="alertaBanco">⚠ Banco de dados não conectado. Confira usuário e senha em <b>conexao.php</b>. Os votos não serão salvos.</p>
+            <a class="botao botao-resultado" href="resultado.php">📊 Ver Resultado</a>
+            <button class="botao botao-zerar" id="btnZerar">🔄 Zerar Votação</button>
+            <p class="dica">Dica: você também pode usar o teclado do computador.<br>
+                <kbd>0-9</kbd> números · <kbd>Enter</kbd> confirma · <kbd>Backspace</kbd> corrige · <kbd>B</kbd> branco</p>
+        </aside>
+
+    </main>
+
+    <script src="js/urna.js"></script>
+</body>
+</html>
