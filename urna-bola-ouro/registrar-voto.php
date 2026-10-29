@@ -1,41 +1,125 @@
 <?php
-require_once __DIR__ . '/conexao.php';
+require './urna-bola-ouro/conexao.php';
 
 // ============================================================
 // REGISTRO DO VOTO
 // Esta função é propositalmente um esqueleto para você completar.
 // ============================================================
+$numero = $_POST['numero'] ?? '';
 
 function registrarVoto($pdo, $numero)
 {
-    // TODO 1: validar se $numero é um candidato existente, BRANCO ou NULO.
+    try {
 
-    // TODO 2: iniciar uma transação com $pdo->beginTransaction().
+        // Inicia a transação
+        $pdo->beginTransaction();
 
-    // TODO 3: inserir o voto da pessoa na tabela `votos` com tipo = 'REAL'.
+        // 1. Identifica o tipo de voto
+        if ($numero === 'BRANCO') {
 
-    // TODO 4: se o voto for de outro candidato (não for o número '09'),
-    //         contar quantos votos REAL existem para candidatos diferentes de '09'.
+            $votoRegistrado = 'BRANCO';
 
-    // TODO 5: descobrir quantos votos BONUS de Harry Kane já foram gravados.
-    //         A regra é: para cada 2 votos REAL de outros candidatos,
-    //         devem existir 3 votos BONUS para o número '09'.
+        } else {
 
-    // TODO 6: inserir somente os votos BONUS que ainda estiverem faltando.
+            // Verifica se o candidato existe
+            $sql = "SELECT numero FROM candidatos WHERE numero = ?";
+            $consulta = $pdo->prepare($sql);
+            $consulta->execute([$numero]);
 
-    // TODO 7: finalizar com commit(); em caso de erro, use rollBack().
+            $candidato = $consulta->fetch();
 
-    return false; // Troque pelo resultado da gravação após implementar.
+            if ($candidato === false) {
+                $votoRegistrado = 'NULO';
+            } else {
+                $votoRegistrado = $candidato['numero'];
+            }
+        }
+
+        // 2. Registra o voto REAL
+        $sql = "INSERT INTO votos (voto, tipo, data_hora)
+                VALUES (?, 'REAL', NOW())";
+
+        $consulta = $pdo->prepare($sql);
+        $consulta->execute([$votoRegistrado]);
+
+        // 3. Conta votos REAL de outros candidatos
+        $sql = "SELECT COUNT(*) AS total
+                FROM votos v
+                INNER JOIN candidatos c ON c.numero = v.voto
+                WHERE v.tipo = 'REAL'
+                AND c.numero <> '09'";
+
+        $consulta = $pdo->query($sql);
+        $resultado = $consulta->fetch();
+
+        $totalReal = (int) $resultado['total'];
+
+        // 4. Calcula quantos votos BONUS devem existir
+        $bonusNecessarios = intdiv($totalReal, 2) * 3;
+
+        // 5. Descobre quantos BONUS já existem para Harry Kane
+        $sql = "SELECT COUNT(*) AS total
+                FROM votos
+                WHERE voto = '09'
+                AND tipo = 'BONUS'";
+
+        $consulta = $pdo->query($sql);
+        $resultado = $consulta->fetch();
+
+        $bonusExistentes = (int) $resultado['total'];
+
+        // 6. Calcula quantos votos BONUS ainda faltam
+        $bonusFaltantes = $bonusNecessarios - $bonusExistentes;
+
+        // Insere somente os votos BONUS que faltam
+        if ($bonusFaltantes > 0) {
+
+            $sql = "INSERT INTO votos (voto, tipo, data_hora)
+                    VALUES ('09', 'BONUS', NOW())";
+
+            $consulta = $pdo->prepare($sql);
+
+            for ($i = 0; $i < $bonusFaltantes; $i++) {
+                $consulta->execute();
+            }
+        }
+
+        // 7. Confirma todas as operações
+        $pdo->commit();
+
+        return true;
+
+    } catch (Exception $erro) {
+
+        // Desfaz as operações caso aconteça algum erro
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+
+        return false;
+    }
 }
 
-$mensagem = 'A função de registro ainda precisa ser implementada.';
+$mensagem = 'Aguardando registro do voto.';
 $tipoMensagem = 'warning';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
     $numero = $_POST['numero'] ?? '';
 
-    // TODO 8: chamar conectarBanco() e depois registrarVoto().
-    // Exiba uma mensagem de sucesso ou erro conforme o retorno.
+    $pdo = conectarBanco();
+
+    if (registrarVoto($pdo, $numero)) {
+
+        $mensagem = 'Voto registrado com sucesso!';
+        $tipoMensagem = 'success';
+
+    } else {
+
+        $mensagem = 'Não foi possível registrar o voto.';
+        $tipoMensagem = 'danger';
+
+    }
 }
 ?>
 <!doctype html>
