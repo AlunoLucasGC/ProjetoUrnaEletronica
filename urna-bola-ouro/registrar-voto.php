@@ -1,5 +1,5 @@
 <?php
-require './urna-bola-ouro/conexao.php';
+require './conexao.php';
 
 // ============================================================
 // REGISTRO DO VOTO

@@ -1,17 +1,57 @@
 <?php
 require_once __DIR__ . '/conexao.php';
 
+
 function buscarResultados($pdo)
 {
-    // TODO 1: fazer uma consulta que agrupe os votos por número de candidato.
-    // TODO 2: separar votos REAL e BONUS para conseguir mostrar os dois totais.
-    // TODO 3: relacionar o resultado com a tabela `candidatos`.
+    $sql = "SELECT
+                c.numero,
+                c.nome,
+                c.time,
+                c.foto,
 
-    return []; // Substitua pelo array retornado da consulta.
+                SUM(CASE
+                    WHEN v.tipo = 'REAL' THEN 1
+                    ELSE 0
+                END) AS votos_reais,
+
+                SUM(CASE
+                    WHEN v.tipo = 'BONUS' THEN 1
+                    ELSE 0
+                END) AS votos_bonus
+
+            FROM candidatos c
+
+            LEFT JOIN votos v
+                ON c.numero = v.voto
+
+            GROUP BY
+                c.numero,
+                c.nome,
+                c.time,
+                c.foto
+
+            ORDER BY
+                (votos_reais + votos_bonus) DESC";
+
+    $consulta = $pdo->prepare($sql);
+    $consulta->execute();
+
+    $resultados = $consulta->fetchAll(PDO::FETCH_ASSOC);
+
+    return $resultados;
 }
 
-$resultados = [];
-// TODO 4: conectar ao banco e chamar buscarResultados($pdo).
+$resultados =[];
+
+try{
+    $pdo = conectarBanco();
+    $resultados = buscarResultados($pdo);
+
+}catch(Exception $erro){
+    $mensagemErro = '';
+}
+
 ?>
 <!doctype html>
 <html lang="pt-BR">
@@ -28,10 +68,52 @@ $resultados = [];
         <section class="surface-card">
             <p class="eyebrow">APURAÇÃO</p>
             <h1 class="panel-title mb-4">Resultado da votação</h1>
+            <?php if (!empty($mensagemErro)): ?>
+
+            <div class="alert alert-danger">
+            <?= htmlspecialchars($mensagemErro) ?>
+            </div>
+
+            <?php endif; ?>
             <?php if (empty($resultados)): ?>
                 <div class="alert alert-info">Implemente a função <strong>buscarResultados()</strong> para carregar os dados do MySQL nesta tabela.</div>
             <?php else: ?>
-                <!-- TODO: montar as linhas da tabela usando os dados de $resultados. -->
+                <table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Número</th>
+            <th>Jogador</th>
+            <th>Time</th>
+            <th>Votos reais</th>
+            <th>Votos bônus</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <?php foreach ($resultados as $resultado): ?>
+
+            <tr>
+                <td><?= htmlspecialchars($resultado['numero']) ?></td>
+
+                <td><?= htmlspecialchars($resultado['nome']) ?></td>
+
+                <td><?= htmlspecialchars($resultado['time']) ?></td>
+
+                <td><?= $resultado['votos_reais'] ?></td>
+
+                <td><?= $resultado['votos_bonus'] ?></td>
+
+                <td>
+                    <strong>
+                        <?= $resultado['votos_reais'] + $resultado['votos_bonus'] ?>
+                    </strong>
+                </td>
+            </tr>
+
+        <?php endforeach; ?>
+    </tbody>
+</table>
             <?php endif; ?>
             <a href="index.php" class="btn btn-warning mt-3">Voltar para a urna</a>
         </section>

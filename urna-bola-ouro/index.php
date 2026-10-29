@@ -7,22 +7,23 @@
 
 include 'conexao.php';
 
-function buscarCandidato($pdo){
+function buscarCandidato($pdo)
+{
     $sql = "SELECT numero, nome, time, foto FROM candidatos";
-    
+
     $consulta = $pdo->query($sql);
     $candidatos = $consulta->fetchAll();
 
     return $candidatos;
-    
-    }
+}
 
-    $pdo = conectarBanco();
-    $candidatos = buscarCandidato($pdo);
+$pdo = conectarBanco();
+$candidatos = buscarCandidato($pdo);
 
 ?>
 <!doctype html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,12 +31,13 @@ function buscarCandidato($pdo){
 
     <!-- Bootstrap 5.3.8 via CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-          rel="stylesheet"
-          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-          crossorigin="anonymous">
+        rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+        crossorigin="anonymous">
 
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
+
 <body>
     <div class="page-shell">
         <header class="topbar">
@@ -67,15 +69,15 @@ function buscarCandidato($pdo){
                     <div class="candidate-list" id="listaCandidatos">
                         <?php foreach ($candidatos as $candidato): ?>
                             <button type="button"
-                                    class="candidate-option"
-                                    data-numero="<?= htmlspecialchars($candidato['numero']) ?>"
-                                    data-nome="<?= htmlspecialchars($candidato['nome']) ?>"
-                                    data-time="<?= htmlspecialchars($candidato['time']) ?>"
-                                    data-foto="<?= htmlspecialchars($candidato['foto']) ?>">
+                                class="candidate-option"
+                                data-numero="<?= htmlspecialchars($candidato['numero']) ?>"
+                                data-nome="<?= htmlspecialchars($candidato['nome']) ?>"
+                                data-time="<?= htmlspecialchars($candidato['time']) ?>"
+                                data-foto="<?= htmlspecialchars($candidato['foto']) ?>">
                                 <span class="candidate-avatar">
                                     <img src="assets/img/<?= htmlspecialchars($candidato['foto']) ?>"
-                                         alt="Foto de <?= htmlspecialchars($candidato['nome']) ?>"
-                                         onerror="this.style.display='none'; this.parentElement.classList.add('avatar-fallback');">
+                                        alt="Foto de <?= htmlspecialchars($candidato['nome']) ?>"
+                                        onerror="this.style.display='none'; this.parentElement.classList.add('avatar-fallback');">
                                 </span>
                                 <span class="candidate-copy">
                                     <strong><?= htmlspecialchars($candidato['nome']) ?></strong>
@@ -183,26 +185,38 @@ function buscarCandidato($pdo){
             <aside class="col-12 col-lg-3">
                 <section class="surface-card h-100 side-panel">
                     <p class="eyebrow mb-1">ACOMPANHAMENTO</p>
+
                     <h2 class="panel-title">Painel da votação</h2>
 
-                    <div class="simulation-box">
-                        <div class="simulation-icon">✦</div>
-                        <div>
-                            <strong>Regra especial da simulação</strong>
-                            <p class="mb-0">A cada 2 votos em outros candidatos, Harry Kane recebe 3 votos bônus automáticos.</p>
-                        </div>
-                    </div>
+                    <?php if (isset($_GET['status'])): ?>
+
+                        <?php if ($_GET['status'] === 'sucesso'): ?>
+                            <div class="alert alert-success mt-3" role="alert">
+                                Votação zerada com sucesso!
+                            </div>
+
+                        <?php elseif ($_GET['status'] === 'erro'): ?>
+                            <div class="alert alert-danger mt-3" role="alert">
+                                Não foi possível zerar a votação. Tente novamente.
+                            </div>
+                        <?php endif; ?>
+
+                    <?php endif; ?>
 
                     <div class="side-actions">
-                        <a class="btn btn-outline-light w-100" href="resultado.php">📊 Ver resultado</a>
-                        <form action="zerar-votacao.php" method="POST" id="formZerar">
-                            <button type="submit" class="btn btn-outline-danger w-100">↻ Zerar votação</button>
-                        </form>
-                    </div>
 
-                    <div class="side-note">
-                        <span class="note-line"></span>
-                        <p>Projeto acadêmico demonstrativo. Os votos bônus são identificados separadamente no banco de dados.</p>
+                        <a class="btn btn-outline-light w-100" href="resultado.php">📊 Ver resultado</a>
+
+                        <form action="zerar-votos.php" method="POST"
+                            onsubmit="return confirm('Tem certeza que deseja apagar todos os votos?');">
+
+                            <button type="submit" class="btn btn-danger w-100">
+                                <span class="me-2">↻</span>
+                                Zerar votação
+                            </button>
+
+                        </form>
+
                     </div>
                 </section>
             </aside>
@@ -215,8 +229,9 @@ function buscarCandidato($pdo){
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-FKyoEForCGlyvwxH9j09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-            crossorigin="anonymous"></script>
+        integrity="sha384-FKyoEForCGlyvwxH9j09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
     <script src="assets/js/urna.js"></script>
 </body>
+
 </html>
